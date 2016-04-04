@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SshCommandExecuter</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_add_connection2">AddConnection2</string>
+    <string name="title_activity_commands">CommandsActivity</string>
+    <string name="title_activity_add_command">AddCommandActivity</string>
+    <string name="title_activity_command_result">CommandResultActivity</string>
+</resources>
