@@ -1,7 +1,13 @@
 package com.cecchi_linux.sshcommandexecuter.utils;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.cecchi_linux.sshcommandexecuter.model.Command;
 import com.cecchi_linux.sshcommandexecuter.model.MyConnection;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,6 +29,9 @@ import ch.ethz.ssh2.StreamGobbler;
  * Created by Enri on 31/03/2016.
  */
 public class DataSingleton {
+
+    private static final String JSON_FILE_NAME = "commandsFile";
+    private boolean alreadyLoaded = false;
 
     private static DataSingleton instance = null;
     private List<MyConnection> connections;
@@ -212,6 +221,54 @@ public class DataSingleton {
                 return null;
             }
             return res;
+        }
+    }
+
+//    public void setLoaded(boolean loaded){
+//        this.alreadyLoaded = loaded;
+//    }
+
+    public boolean isLoaded(){
+        return this.alreadyLoaded;
+    }
+
+    public void saveCommands(Context context) {
+        JSONArray array = new JSONArray();
+
+        for (MyConnection connection : this.connections) {
+            try {
+                array.put(connection.toJSONObject());
+            } catch (Exception e) {
+                Log.e("saveUtenti", "Errore durante l'aggiunta di un nuovo utente", e);
+            }
+        }
+
+        FileUtils.writeToFile(array.toString(), JSON_FILE_NAME, context);
+    }
+
+    public void loadConnections(Context context) {
+        this.alreadyLoaded = true;
+        String data = FileUtils.readFromFile(JSON_FILE_NAME, context);
+
+        if (data != null && !data.isEmpty()) {
+            try {
+                JSONArray array = new JSONArray(data);
+                //DataManager manager = DataManager.getInstance();
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject json = array.optJSONObject(i);
+                    if (json != null) {
+                        try {
+                            MyConnection connection = new MyConnection(json);
+                            addConnection(connection);
+
+                        } catch (Exception e) {
+                            Log.e("loadConnections", "Error to parse connections", e);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("loadConnections", "Error to parse the list of connections", e);
+            }
         }
     }
 }

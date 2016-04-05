@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,16 +54,17 @@ public class MainActivity extends AppCompatActivity {
 
         ListView listView = (ListView)findViewById(R.id.listViewConnections);
         List connectionsList = DataSingleton.getInstance().getConnections();
+        ArrayList<Command> commandsDebug = new ArrayList<>();
 
         //DEBUG
-        ArrayList<Command> commandsDebug = new ArrayList<>();
         //commandsDebug.add(new Command("spegni","sudo shutdown -h now"));
-        commandsDebug.add(new Command("spegni","echo \"ciao\""));
-        commandsDebug.add(new Command("errore","fefe"));
-        connectionsList.add(new MyConnection("conn1","192.168.0.110",22,"pi","raspberry",commandsDebug));
-        ConnectionAdapter adapter = new ConnectionAdapter(this, R.layout.connection_row_adapter, connectionsList);
+//        commandsDebug.add(new Command("spegni","echo \"ciao\""));
+//        commandsDebug.add(new Command("errore","fefe"));
+//        connectionsList.add(new MyConnection("conn1","192.168.0.110",22,"pi","raspberry",commandsDebug));
         //DEBUG END
 
+        initConnections();
+        ConnectionAdapter adapter = new ConnectionAdapter(this, R.layout.connection_row_adapter, connectionsList);
         listView.setAdapter(adapter);
 
         AdapterView.OnItemClickListener clickListener = new AdapterView.OnItemClickListener() {
@@ -78,6 +80,12 @@ public class MainActivity extends AppCompatActivity {
         };
         listView.setOnItemClickListener(clickListener);
 
+    }
+
+    private void initConnections(){
+        if(!DataSingleton.getInstance().isLoaded()) {
+            DataSingleton.getInstance().loadConnections(this);
+        }
     }
 
     @Override
@@ -119,5 +127,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onStop(){
+        super.onStop();
+        Log.e("onStop", "stop", null);
+        DataSingleton.getInstance().saveCommands(this);
+    }
 
 }
